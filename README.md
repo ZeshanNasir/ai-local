@@ -44,6 +44,7 @@ Measured on one M4 Pro with 48 GB, on one day. Check a model on your own work be
 ## For contributors and reviewers
 
 Read [AGENTS.md](AGENTS.md) first: the mission, the boundaries and a map of the repository.
+Read [EXECUTIVE_BRIEF.md](EXECUTIVE_BRIEF.md) for the hardware procurement baseline and financial payback model.
 
 `python3 -m unittest discover -s tests` needs no model and no network.
 
