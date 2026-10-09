@@ -2,12 +2,9 @@
 
 No serial numbers, hostnames, usernames or account identifiers are recorded.
 """
-import json
 import platform
 import re
 import subprocess
-import threading
-import time
 
 from . import ollama
 
@@ -53,32 +50,3 @@ def snapshot():
         "swap_used_mb": swap_used_mb(),
     }
 
-
-class Sampler(threading.Thread):
-    """Samples memory headroom and swap while a measurement runs, to catch pressure that
-    a before/after reading would miss."""
-
-    def __init__(self, interval=3.0):
-        super().__init__(daemon=True)
-        self.interval, self._stop_flag, self.free, self.swap = interval, threading.Event(), [], []
-
-    def run(self):
-        while not self._stop_flag.is_set():
-            f, s = memory_free_pct(), swap_used_mb()
-            if f is not None:
-                self.free.append(f)
-            if s is not None:
-                self.swap.append(s)
-            self._stop_flag.wait(self.interval)
-
-    def result(self):
-        self._stop_flag.set()
-        self.join(timeout=10)
-        return {"min_free_pct": min(self.free) if self.free else None,
-                "max_swap_mb": max(self.swap) if self.swap else None,
-                "swap_growth_mb": (max(self.swap) - self.swap[0]) if self.swap else None,
-                "samples": len(self.free)}
-
-
-def main():
-    print(json.dumps(snapshot(), indent=2))

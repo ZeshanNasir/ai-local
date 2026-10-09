@@ -5,8 +5,7 @@ on:
     branches: [ main ]
   pull_request:
 
-# The tests use no model and no network: scorers, statistics, cost arithmetic and the runner
-# logic against a fake client. Measurements themselves need a local Ollama and are run by hand.
+# The tests use no model and no network: scorers, statistics and the runner logic against a fake client.
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -19,4 +18,3 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: python -m unittest discover -s tests
-      - run: python -m labbench cost examples/assumptions.example.json

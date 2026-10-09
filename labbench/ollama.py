@@ -112,8 +112,3 @@ def unload_all():
     for m in loaded():
         unload(m["name"])
 
-
-def embed(model, texts, timeout=300):
-    start = time.perf_counter()
-    data = post("/api/embed", {"model": model, "input": texts}, timeout=timeout)
-    return data["embeddings"], time.perf_counter() - start
