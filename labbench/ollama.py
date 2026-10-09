@@ -3,6 +3,7 @@ import json
 import os
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 
@@ -10,6 +11,10 @@ from dataclasses import dataclass, field
 def base_url():
     host = os.environ.get("OLLAMA_HOST", "127.0.0.1:11434")
     return host if host.startswith("http") else f"http://{host}"
+
+
+def is_loopback():
+    return urllib.parse.urlsplit(base_url()).hostname in ("127.0.0.1", "localhost", "::1")
 
 
 @dataclass

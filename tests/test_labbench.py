@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from labbench import bench, cost, embed, netcheck, ollama, report, scoring, stats, workloads
+from labbench import bench, cost, embed, netcheck, ollama, report, scoring, start, stats, workloads
 
 REPO = Path(__file__).resolve().parent.parent / "data" / "synthetic" / "coding" / "repo"
 FIXED = '''def apply_discount(price_cents: int, percent: int) -> int:
@@ -161,6 +161,31 @@ class Data(unittest.TestCase):
             self.assertTrue(set(q["expect"].get("sources", [])) <= set(docs), q["id"])
         for case in workloads.load_logs():
             self.assertTrue(all(1 <= n <= len(case["lines"]) for n in case["expect"]["evidence"]), case["id"])
+
+
+class FirstRun(unittest.TestCase):
+    def test_loopback_detection(self):
+        for host, ok in (("127.0.0.1:11434", True), ("http://localhost:11434", True), ("10.0.0.5:11434", False), ("https://example.com", False)):
+            with mock.patch.dict("os.environ", {"OLLAMA_HOST": host}):
+                self.assertEqual(ollama.is_loopback(), ok, host)
+
+    def test_remote_server_is_refused_before_anything_else_runs(self):
+        with mock.patch.dict("os.environ", {"OLLAMA_HOST": "10.0.0.5:11434"}), \
+             mock.patch.object(start.sys, "platform", "darwin"), mock.patch.object(start.platform, "machine", return_value="arm64"):
+            self.assertIn("not this machine", start.preflight()[0])
+
+    def test_offered_models_come_from_saved_evidence(self):
+        names = [m[0] for m in start.measured_models()]
+        self.assertEqual(sorted(names), ["gemma4:26b-mlx", "qwen3.6:35b-mlx", "qwen3.8:27b-mlx"])
+        self.assertTrue(all(size for _, size, _ in start.measured_models()))
+
+    def test_missing_model_is_not_pulled_without_consent(self):
+        snap = {"chip": "Apple M4 Pro", "memory_gib": 48, "macos": "27", "ollama_version": "x", "power": "AC",
+                "memory_free_pct": 50, "installed_models": []}
+        with mock.patch.object(start, "preflight", return_value=[]), mock.patch.object(start.env, "snapshot", return_value=snap), \
+             mock.patch.object(start, "_ask", return_value=False), mock.patch.object(start.subprocess, "run") as pull:
+            self.assertEqual(start.run("gemma4:26b-mlx"), 1)
+        pull.assert_not_called()
 
 
 if __name__ == "__main__":

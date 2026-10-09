@@ -1,110 +1,71 @@
 # ai-local
 
-Measurements of practical local-AI engineering workloads on an Apple Silicon Mac, with every result file published.
+How much real engineering work can a developer Mac do with a local model, and at what cost in speed and memory?
 
-The question is narrow: on one ordinary workstation, which engineering tasks run locally at acceptable quality, speed and memory use? This is not a model ranking, not a platform, and not a claim that local models replace hosted ones.
+`ai-local` answers that with measurements, not impressions. It runs open-weight models through [Ollama](https://ollama.com) on Apple Silicon, times them, scores them on small synthetic engineering tasks, and saves every result with the conditions it was measured under. It is not a model leaderboard, and it does not claim local models replace hosted ones.
 
-## Scope
+## First run
 
-- **Supported:** macOS on Apple Silicon, with [Ollama](https://ollama.com) as the runtime.
-- **Measured baseline:** Apple M4 Pro, 48 GB unified memory, macOS 27.0.1, on AC power, Ollama 0.40.1 with flash attention and an 8-bit KV cache.
-- **Not tested:** other chips, other memory sizes, other runtimes, Linux or Windows.
-
-## Quick start
-
-Requires Python 3.10 or newer. Standard library only; nothing to install.
+Requirements: a Mac with Apple Silicon, Python 3.10 or newer (included with the Xcode Command Line Tools), and [Ollama](https://ollama.com/download) installed and running. Nothing else to install.
 
 ```sh
-git clone https://github.com/ZeshanNasir/ai-local.git && cd ai-local
-python3 -m unittest discover -s tests      # 19 tests; no model, no network
-python3 -m labbench env                    # machine and runtime snapshot
+git clone https://github.com/ZeshanNasir/ai-local.git
+cd ai-local
+./lab
 ```
 
-To measure, pull a model in Ollama yourself first. The runner never downloads models and never falls back to a hosted service.
+`./lab` then:
 
-```sh
-python3 -m labbench throughput gemma4:26b-mlx --runs 5
-python3 -m labbench workloads gemma4:26b-mlx --repeats 3
-scripts/run_suite.sh gemma4:26b-mlx         # throughput, workloads and context ladder
-python3 -m labbench report benchmarks/results/2026-10-09
-```
+1. Checks the machine, Python and Ollama, and explains what is missing with a link to the official installer. It installs nothing.
+2. Refuses to run if `OLLAMA_HOST` points anywhere other than this machine.
+3. Lists the models that have published measurements and marks which are installed.
+4. If the chosen model is missing, shows its size and asks before running `ollama pull`. Nothing is downloaded without a yes.
+5. Runs a short benchmark: three warm throughput runs and the 15 synthetic tasks once. About a minute on the baseline machine once the model is loaded. The memory-stressing context ladder is not part of it.
+6. Saves `report.md` and the raw JSON to `results/<timestamp>/`, with chip, memory, macOS, Ollama version and power source recorded.
 
-Close heavy applications first. The context ladder deliberately pushes memory; read the stop conditions in [`docs/methodology.md`](docs/methodology.md) before running it.
+`./lab --model gemma4:26b-mlx` skips the menu. The full CLI remains available: `python3 -m labbench --help`.
 
-## What is measured
+## Measured environment
 
-| Measure | How |
-| :--- | :--- |
-| Throughput | Cold load, time to first token, prompt and decode tokens/s; median of 5 warm runs |
-| Context ladder | A fact hidden mid-prompt at increasing sizes; stops when free memory or swap crosses a limit |
-| Workloads | Synthetic log analysis, document questions (including stale and conflicting sources) and one code fix, scored deterministically |
-| Retrieval | An embedding model against a BM25 baseline on a small question set |
-| Cost | Break-even arithmetic from an assumptions file; a calculator, not a result |
+All published results come from one machine: Apple M4 Pro, 48 GB unified memory, macOS 27.0.1, on AC power, Ollama 0.40.1 with flash attention and an 8-bit KV cache. Other chips and memory sizes have not been measured. `./lab` runs on them, says so, and the numbers it produces are your own first measurement, not a validated result.
 
-Details: [`docs/methodology.md`](docs/methodology.md), [`docs/workloads.md`](docs/workloads.md), [`docs/cost-model.md`](docs/cost-model.md).
+## Selected findings (2026-10-09)
 
-## Results (2026-10-09)
+| Model | Decode tok/s | Prompt tok/s | Logs | Documents | Code fix, one shot | Largest completed context |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `qwen3.6:35b-mlx` | 68.3 | 991 | 16/18 | 24/24 | 3/3 | 67,901 tokens |
+| `gemma4:26b-mlx` | 59.5 | 876 | 18/18 | 24/24 | 0/3 | 136,108 tokens |
+| `qwen3.8:27b-mlx` | 26.1 | 137 | 15/18 | 24/24 | 3/3 | 67,152 tokens |
 
-Measured on the baseline machine above. The desktop was in normal use, with about 12 GB of swap already in use before the runs, so memory figures are conservative. Raw files: [`benchmarks/results/2026-10-09`](benchmarks/results/2026-10-09/).
+Throughput is the median of 5 warm runs (about 1,000-token prompt, 256-token cap, thinking off). Tasks ran 3 times each at temperature 0. The context column is the largest prompt recalled correctly before free memory fell to 13 to 15%, where the ladder stops.
 
-**Throughput** (about 1,000-token prompt, 256-token cap, thinking off, median of 5)
+- Decode speed differs by more than 2x between models of similar size.
+- Long prompts hurt latency before memory: 2 to 12 minutes to the first token at about 67,000 tokens.
+- One-shot and agent-loop results differ: `gemma4:26b-mlx` failed the code fix in one shot, but fixed it in each of three experimental agent sessions that could run the tests.
+- The log and document tasks are too easy to separate the models. They show the method works, not which model is better at real work.
 
-| Model | Time to first token | Prompt tok/s | Decode tok/s |
-| :--- | ---: | ---: | ---: |
-| `qwen3.6:35b-mlx` | 1.13 s | 991 | 68.3 |
-| `gemma4:26b-mlx` | 1.25 s | 876 | 59.5 |
-| `qwen3.8:27b-mlx` | 8.12 s | 137 | 26.1 |
+Full tables, including cold load, spread and every ladder step: `python3 -m labbench report benchmarks/results/2026-10-09`. Raw files: [`benchmarks/results/2026-10-09`](benchmarks/results/2026-10-09/).
 
-**Workloads** (3 repeats per case, temperature 0)
+## Method
 
-| Model | Logs (6 cases) | Documents (8) | Code fix, one shot (1) |
-| :--- | ---: | ---: | ---: |
-| `qwen3.6:35b-mlx` | 16/18 | 24/24 | 3/3 |
-| `gemma4:26b-mlx` | 18/18 | 24/24 | 0/3 |
-| `qwen3.8:27b-mlx` | 15/18 | 24/24 | 3/3 |
+- **Throughput:** one cold load, then warm runs with cache-busting prompts; timings are the server's own counters.
+- **Workloads:** 6 log cases (does the evidence support the stated cause?), 8 document questions including stale and conflicting sources, and 1 bug fix checked by running its tests. Scoring is deterministic; no model grades another.
+- **Context ladder:** a fact hidden mid-prompt at growing sizes, with memory and swap sampled throughout.
 
-**Largest completed context step** (fact recalled in every completed step)
+Definitions, protocol and settings: [`docs/methodology.md`](docs/methodology.md). The tasks and what they cannot show: [`docs/workloads.md`](docs/workloads.md). Break-even arithmetic with placeholder inputs (a calculator, not a result): [`docs/cost-model.md`](docs/cost-model.md).
 
-| Model | Prompt tokens | Time to first token | Lowest free memory | Swap growth |
-| :--- | ---: | ---: | ---: | ---: |
-| `gemma4:26b-mlx` | 136,108 | 388 s | 13% | 1.8 GB |
-| `qwen3.6:35b-mlx` | 67,901 | 150 s | 13% | 1.8 GB |
-| `qwen3.8:27b-mlx` | 67,152 | 704 s | 15% | 3.2 GB |
+## Limitations and privacy
 
-Each of these steps crossed the runner's memory limit, so the ladder stopped there. Full ladder: `python3 -m labbench report`.
-
-What this supports:
-
-- Decode speed differs by more than 2x between the models tested. `qwen3.8:27b-mlx` also reads prompts 6 to 7 times slower.
-- Long prompts become a latency problem before a memory problem: about 2.5 to 12 minutes to first token at about 67,000 tokens.
-- The advertised 262,144-token context was not tested and is not claimed.
-- The document and log tasks are too easy to separate the models. They show the method works, not which model is better at real work.
-- The embedding model matched the BM25 baseline exactly on six queries. That is an integration check, not a quality result.
-
-## Limitations
-
-One machine, one day, one operator. Short generations, small synthetic tasks, thinking off, one runtime. Nothing here shows how these models perform on real operational data, on other hardware or in a team. A synthetic pass rate is not a production success rate.
-
-Not established: a fixed memory ceiling for these models, the full advertised context, cost savings, and whether any model is dense or mixture-of-experts (local metadata does not say, except the `qwen3_5_moe` architecture tag on `qwen3.6:35b-mlx`). Earlier single-run figures in [`benchmarks/prior`](benchmarks/prior/README.md) were not repeated and are kept only for comparison.
-
-## Privacy and execution boundaries
-
-- All tasks and documents are synthetic. No private or employer data is used.
-- The runner talks only to the Ollama server at `OLLAMA_HOST` (default `127.0.0.1:11434`). Pointing that variable at another machine makes inference remote. The runner does not download models or call hosted inference.
-- Running a model locally does not, by itself, keep data on the machine. Any harness, editor or tool server around the model can make its own connections. See [`docs/privacy.md`](docs/privacy.md).
-
-## Experimental: coding-agent harness
-
-`python3 -m labbench agent` runs one bounded [OpenCode](https://opencode.ai) session on the code-fix task and scores it by running the tests. It is not part of the quick start because its network behaviour is unresolved: with a minimal local-only config, OpenCode still opened three to four connections to non-local endpoints in every session. Their purpose and content were not identified.
-
-Saved results: 9 of 9 scored sessions (three per model) fixed the bug without editing tests, in 40 to 250 seconds. Before those runs, at least four debugging sessions failed or were stopped while the runner was being fixed. The main defect: OpenCode read `PWD` and worked in the wrong directory. Those sessions are not in the result files, and the nine scored runs do not show how often a first attempt succeeds in other setups. Details: [`docs/harness-compatibility.md`](docs/harness-compatibility.md).
+- One machine, one day, one operator, small synthetic tasks, short generations, thinking off. A synthetic pass rate is not a production success rate.
+- Not established: a fixed memory ceiling, the advertised 262,144-token context, cost savings, or whether each model is dense or mixture-of-experts.
+- All tasks are synthetic. `./lab` talks only to Ollama on this machine and never calls a hosted model.
+- A local model does not make the surrounding tools private. Editors, agent harnesses and tool servers can make their own connections: [`docs/privacy.md`](docs/privacy.md).
+- **Experimental:** `python3 -m labbench agent` runs an [OpenCode](https://opencode.ai) session on the code-fix task. It is outside the standard workflow because OpenCode opened three to four connections to non-local endpoints in every session, even with a local-only config. Their purpose was not identified. The 9 saved sessions all fixed the bug; earlier debugging sessions that failed before a runner fix are not in the results. See [`docs/harness-compatibility.md`](docs/harness-compatibility.md).
 
 ## Contributing
 
-Issues are welcome for errors in method or results. Please include the output of `python3 -m labbench env`.
+Issues are welcome for errors in method, scoring or results. Include `report.md` from your run or the output of `python3 -m labbench env`. Tests need no model or network: `python3 -m unittest discover -s tests`.
 
 ## Licence
 
-MIT. See [`LICENSE`](LICENSE).
-
-The runner, tests and documents were written with AI assistance (Claude Code), then reviewed and run by the author. Measurements are from real runs on the machine above.
+MIT. Written with AI assistance (Claude Code), then reviewed and run by the author. Every measurement is from a real run on the machine above.

@@ -18,7 +18,7 @@ Every number in `benchmarks/results/` comes from `labbench` on the machine descr
 2. **Throughput:** one cold run, then five warm runs of a roughly 1,000-token prompt. Each prompt starts with a different run id, so the server's prompt cache cannot reuse earlier work. The table reports the median of the warm runs and the spread, `(max - min) / median`; a large spread means the median should not be trusted.
 3. **Workloads:** every case three times, temperature 0, fixed seed, thinking off (see below). A case passes only if every check passes.
 4. **Context ladder:** a prompt of the target length with one fact hidden in the middle and a question about it at the end. A step passes only if the server reports a prompt of about the target length (so nothing was silently truncated) and the fact was recalled. The ladder stops at the first step that errors, drops free memory below 15% or grows swap by more than 2 GiB.
-5. The environment snapshot is stored with every result: macOS, chip, memory, power source, runtime version, and every installed model with its digest and quantization.
+5. The environment snapshot is stored with every result: macOS, chip, memory, power source, runtime version, and the model under test with its digest and quantization (other installed models are counted, not listed).
 
 ## Settings that affect results
 

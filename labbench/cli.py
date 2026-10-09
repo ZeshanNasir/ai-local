@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -44,9 +45,18 @@ def main(argv=None):
     p.add_argument("model"); p.add_argument("--timeout", type=int, default=900); p.add_argument("--repeats", type=int, default=1); p.add_argument("--out")
     p = sub.add_parser("cost", help="break-even arithmetic from an assumptions file")
     p.add_argument("assumptions")
+    p = sub.add_parser("start", help="guided first run: checks, model choice, short benchmark, saved report (what ./lab runs)")
+    p.add_argument("--model"); p.add_argument("--yes", action="store_true", help="agree to pull the chosen model if missing")
     args = ap.parse_args(argv)
 
-    if args.cmd == "env":
+    if args.cmd not in ("report", "cost", "net", "start") and not ollama.is_loopback() and os.environ.get("LABBENCH_ALLOW_REMOTE") != "1":
+        sys.exit(f"OLLAMA_HOST points at {ollama.base_url()}, not this machine. Refusing: this project measures local inference. "
+                 "Set LABBENCH_ALLOW_REMOTE=1 to override for the CLI.")
+
+    if args.cmd == "start":
+        from . import start
+        return start.run(args.model, args.yes)
+    elif args.cmd == "env":
         env.main()
     elif args.cmd == "throughput":
         r = bench.throughput(args.model, runs=args.runs)
