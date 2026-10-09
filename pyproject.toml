@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "local-ai-engineering-lab"
+name = "ai-local"
 version = "0.1.0"
 description = "Measure what local AI can do on an engineering workstation: throughput, context, memory, task quality and cost arithmetic"
 readme = "README.md"

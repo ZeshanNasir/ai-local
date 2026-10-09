@@ -40,7 +40,7 @@ def main(argv=None):
     p.add_argument("--processes", default="ollama"); p.add_argument("--seconds", type=int, default=30)
     p = sub.add_parser("report", help="print Markdown tables from a results directory")
     p.add_argument("directory")
-    p = sub.add_parser("agent", help="one bounded OpenCode session on the coding task, scored by the tests")
+    p = sub.add_parser("agent", help="experimental: one bounded OpenCode session on the coding task, scored by the tests")
     p.add_argument("model"); p.add_argument("--timeout", type=int, default=900); p.add_argument("--repeats", type=int, default=1); p.add_argument("--out")
     p = sub.add_parser("cost", help="break-even arithmetic from an assumptions file")
     p.add_argument("assumptions")

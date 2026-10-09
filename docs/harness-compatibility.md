@@ -4,7 +4,7 @@ What was actually run, on 2026-10-09, on the machine described in the README.
 
 | Harness | Version | Model backend | Status | Evidence |
 | :--- | :--- | :--- | :--- | :--- |
-| OpenCode | 1.18.35 | Ollama through its OpenAI-compatible endpoint (`/v1`), local | **Tested.** Three scored sessions each with `qwen3.6:35b-mlx`, `gemma4:26b-mlx` and `qwen3.8:27b-mlx`; all nine fixed the task | `benchmarks/results/*/*.agent.json` |
+| OpenCode | 1.18.35 | Ollama through its OpenAI-compatible endpoint (`/v1`), local | **Tested, experimental.** Three scored sessions each with `qwen3.6:35b-mlx`, `gemma4:26b-mlx` and `qwen3.8:27b-mlx`; all nine fixed the task. Earlier debugging sessions that failed before the runner fix below are not recorded. Network behaviour unresolved; see [`privacy.md`](privacy.md) | `benchmarks/results/*/*.agent.json` |
 | Claude Code | installed | Ollama (documented in the operator's notes) | **Not tested in this pass.** Whether it runs against a local model, and with what tool support, is unverified | none |
 | Goose | not installed | none | **Not installed.** Unverified | none |
 | DeepSeek-related harness (`dsh`) | not installed | none | **Not installed.** A wrapper script exists in the operator's private repository; the binary it launches was not present | none |
