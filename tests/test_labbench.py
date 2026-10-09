@@ -150,8 +150,10 @@ class Lab(unittest.TestCase):
         self.assertEqual(self._run_main(["gemma4:26b-mlx"], installed=[], pulled=True)[1], ["pull", "test"])
         self.assertEqual(self._run_main(["gemma4:26b-mlx"], installed=[], pulled=False)[1], ["pull"])
 
-    def test_model_outside_the_measured_list_is_never_pulled(self):
+    def test_model_outside_the_measured_list_is_rejected_even_when_installed(self):
         self.assertEqual(self._run_main(["other:1"], installed=[], pulled=True), (1, [], False))
+        self.assertEqual(self._run_main(["other:1"], installed=["other:1"]), (1, [], False))
+        self.assertEqual(self._run_main(["gemma4:26b-mlx", "other:1"], installed=[], pulled=True), (1, [], False))  # nothing pulled before the check
 
     def test_quitting_the_picker_runs_nothing_and_saves_nothing(self):
         self.assertEqual(self._run_main([], installed=[], pick=None), (0, [], False))

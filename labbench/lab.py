@@ -1,7 +1,7 @@
 """./lab: which local model should I use on this Mac?
 
-Tests a model in Ollama for speed and tasks passed, prints one table and saves it.
-Downloads a model only after you type y, and never talks to a server other than this machine.
+Tests one of the MLX-format models in MEASURED, through Ollama on this Mac, for speed and tasks passed,
+prints one table and saves it. Downloads a model only after you type y; never talks to another machine.
 """
 import json
 import platform
@@ -15,7 +15,7 @@ from . import bench, env, ollama, workloads
 
 ROOT = Path(__file__).resolve().parent.parent
 FAST_TOK_S = 40  # a local rule of thumb, not a standard
-MEASURED = ("qwen3.6:35b-mlx", "gemma4:26b-mlx", "qwen3.8:27b-mlx")  # the models in RESULTS.md
+MEASURED = ("qwen3.6:35b-mlx", "gemma4:26b-mlx", "qwen3.8:27b-mlx")  # official Ollama MLX tags, measured in RESULTS.md. The only models ./lab accepts.
 
 
 def preflight():
@@ -87,7 +87,7 @@ def table(results):
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if argv[:1] in (["-h"], ["--help"]):
-        print("usage: ./lab [MODEL ...]\n\nPick a measured model (or name models) and test it for speed and tasks passed.")
+        print("usage: ./lab [MODEL]\n\nTests a model for speed and tasks passed. Without MODEL it shows a picker.\nMODEL is one of: " + ", ".join(MEASURED))
         return 0
     problem = preflight()
     if problem:
@@ -98,8 +98,12 @@ def main(argv=None):
     models = argv or [choose(installed)]
     if models == [None]:
         return 0
+    unsupported = [m for m in models if m not in MEASURED]
+    if unsupported:
+        print(f"Not supported: {', '.join(unsupported)}. Supported: {', '.join(MEASURED)}", file=sys.stderr)
+        return 1
     for m in models:
-        if m not in installed and not (m in MEASURED and pull(m)):
+        if m not in installed and not pull(m):
             print(f"Not installed: {m}", file=sys.stderr)
             return 1
 

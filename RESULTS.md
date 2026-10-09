@@ -10,7 +10,8 @@ Measured on 2026-10-09 on an Apple M4 Pro with 48 GB, macOS 27.0.1, Ollama 0.40.
 
 ## What else was found
 
-- **Long prompts cost minutes.** At about 67,000 tokens, the first word took 2 to 12 minutes, and two of the three models pushed the Mac into swap. The advertised 262,144-token context was not tested.
+- **Long prompts cost minutes.** At about 67,000 tokens the first word took 137 s (`gemma4:26b-mlx`), 150 s (`qwen3.6:35b-mlx`) and 704 s (`qwen3.8:27b-mlx`). Swap use grew by about 1.8 GB and 3.2 GB for the last two. Only `gemma4:26b-mlx` was tried at about 136,000 tokens: it recalled the planted fact after 388 s and swap grew by about 1.8 GB.
+- **The advertised context was not tested.** The models advertise 262,144 tokens. Nothing here shows that length works on this Mac. `./lab` runs at 8,192 tokens.
 - **Letting a model run the tests helps.** `gemma4:26b-mlx` failed the code fix when answering in one go, but fixed it in three of three sessions in the OpenCode coding agent, where it could run the tests.
 - **Local is not automatically private.** Ollama only used this machine. OpenCode, the agent around it, also connected to outside servers whose purpose was not identified.
 
