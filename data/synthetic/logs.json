@@ -1,0 +1,107 @@
+[
+ {
+  "id": "azure-keyvault-expired-secret",
+  "cloud": "azure",
+  "expect": {
+   "supports": true,
+   "evidence": [
+    4
+   ]
+  },
+  "question": "Why did the orders service start failing to read secrets?",
+  "lines": [
+   "2026-03-02T08:01:11Z INFO  orders-api  startup complete, reading 3 secrets from kv-orders-prod",
+   "2026-03-02T08:01:12Z INFO  KeyVault    GET /secrets/db-conn  200  41ms  principal=app-orders",
+   "2026-03-03T00:00:00Z INFO  AzureAD     app registration app-orders client secret 'orders-2025' reached its end date",
+   "2026-03-03T00:00:04Z ERROR AzureAD     token request for app-orders failed: AADSTS7000222 provided client secret keys are expired",
+   "2026-03-03T00:00:05Z ERROR orders-api  secret refresh failed: unable to acquire token, retry 1/5",
+   "2026-03-03T00:00:35Z ERROR orders-api  secret refresh failed: unable to acquire token, retry 5/5",
+   "2026-03-03T00:00:36Z WARN  orders-api  serving with cached secrets, cache expires in 3600s"
+  ]
+ },
+ {
+  "id": "azure-latency-no-cause",
+  "cloud": "azure",
+  "expect": {
+   "supports": false,
+   "evidence": []
+  },
+  "question": "What caused the slow responses between 14:00 and 14:20?",
+  "lines": [
+   "2026-04-10T14:02:01Z INFO  gateway     p95 latency 480ms (baseline 210ms)",
+   "2026-04-10T14:05:30Z INFO  gateway     p95 latency 530ms",
+   "2026-04-10T14:11:10Z INFO  gateway     p95 latency 610ms",
+   "2026-04-10T14:16:45Z INFO  gateway     p95 latency 290ms",
+   "2026-04-10T14:20:02Z INFO  gateway     p95 latency 215ms (recovered)"
+  ]
+ },
+ {
+  "id": "aws-s3-policy-change",
+  "cloud": "aws",
+  "expect": {
+   "supports": true,
+   "evidence": [
+    3,
+    5
+   ]
+  },
+  "question": "Why did the reporting job lose access to the exports bucket?",
+  "lines": [
+   "{\"eventTime\":\"2026-02-11T09:12:00Z\",\"eventName\":\"GetObject\",\"user\":\"role/reporting-job\",\"bucket\":\"acme-exports\",\"result\":\"Success\"}",
+   "{\"eventTime\":\"2026-02-11T10:40:00Z\",\"eventName\":\"GetObject\",\"user\":\"role/reporting-job\",\"bucket\":\"acme-exports\",\"result\":\"Success\"}",
+   "{\"eventTime\":\"2026-02-11T11:05:00Z\",\"eventName\":\"PutBucketPolicy\",\"user\":\"user/ops-admin\",\"bucket\":\"acme-exports\",\"result\":\"Success\",\"note\":\"policy version 7 replaces 6\"}",
+   "{\"eventTime\":\"2026-02-11T11:30:00Z\",\"eventName\":\"ListBucket\",\"user\":\"role/reporting-job\",\"bucket\":\"acme-exports\",\"result\":\"Success\"}",
+   "{\"eventTime\":\"2026-02-11T12:00:00Z\",\"eventName\":\"GetObject\",\"user\":\"role/reporting-job\",\"bucket\":\"acme-exports\",\"result\":\"AccessDenied\"}"
+  ]
+ },
+ {
+  "id": "aws-5xx-no-cause",
+  "cloud": "aws",
+  "expect": {
+   "supports": false,
+   "evidence": []
+  },
+  "question": "What triggered the burst of 5xx errors?",
+  "lines": [
+   "2026-05-02T03:10:00Z alb/web-prod 5xx=2 requests=1180",
+   "2026-05-02T03:11:00Z alb/web-prod 5xx=57 requests=1204",
+   "2026-05-02T03:12:00Z alb/web-prod 5xx=61 requests=1190",
+   "2026-05-02T03:13:00Z alb/web-prod 5xx=3 requests=1175",
+   "2026-05-02T03:14:00Z alb/web-prod 5xx=1 requests=1160"
+  ]
+ },
+ {
+  "id": "gcp-cpu-quota",
+  "cloud": "gcp",
+  "expect": {
+   "supports": true,
+   "evidence": [
+    4
+   ]
+  },
+  "question": "Why did the autoscaler stop adding nodes?",
+  "lines": [
+   "{\"ts\":\"2026-01-20T16:00:00Z\",\"svc\":\"autoscaler\",\"msg\":\"scale up requested: 3 -> 6 nodes\"}",
+   "{\"ts\":\"2026-01-20T16:00:20Z\",\"svc\":\"autoscaler\",\"msg\":\"created node pool member 4\"}",
+   "{\"ts\":\"2026-01-20T16:00:41Z\",\"svc\":\"autoscaler\",\"msg\":\"created node pool member 5\"}",
+   "{\"ts\":\"2026-01-20T16:01:02Z\",\"svc\":\"compute\",\"severity\":\"ERROR\",\"msg\":\"RESOURCE_EXHAUSTED: Quota CPUS exceeded. Limit: 24.0 in region europe-north1\"}",
+   "{\"ts\":\"2026-01-20T16:01:30Z\",\"svc\":\"autoscaler\",\"msg\":\"scale up stalled at 5 nodes, 1 pending\"}"
+  ]
+ },
+ {
+  "id": "gcp-restarts-no-cause",
+  "cloud": "gcp",
+  "expect": {
+   "supports": false,
+   "evidence": []
+  },
+  "question": "What is making the payments pod restart?",
+  "lines": [
+   "{\"ts\":\"2026-06-01T10:00:00Z\",\"pod\":\"payments-7d9\",\"event\":\"Started\"}",
+   "{\"ts\":\"2026-06-01T10:42:10Z\",\"pod\":\"payments-7d9\",\"event\":\"Terminated\",\"exitCode\":137}",
+   "{\"ts\":\"2026-06-01T10:42:15Z\",\"pod\":\"payments-7d9\",\"event\":\"Started\"}",
+   "{\"ts\":\"2026-06-01T11:31:50Z\",\"pod\":\"payments-7d9\",\"event\":\"Terminated\",\"exitCode\":137}",
+   "{\"ts\":\"2026-06-01T11:31:55Z\",\"pod\":\"payments-7d9\",\"event\":\"Started\"}"
+  ]
+ }
+]

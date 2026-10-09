@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "local-ai-engineering-lab"
+version = "0.1.0"
+description = "Measure what local AI can do on an engineering workstation: throughput, context, memory, task quality and cost arithmetic"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+labbench = "labbench.cli:main"
+
+[tool.setuptools]
+packages = ["labbench"]

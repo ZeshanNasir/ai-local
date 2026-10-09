@@ -1,0 +1,124 @@
+{
+ "recorded_at": "2026-10-09T13:53:52Z",
+ "environment": {
+  "macos": "27.0.1",
+  "hardware_model": "Mac16,7",
+  "chip": "Apple M4 Pro",
+  "memory_gib": 48,
+  "gpu_wired_limit_mb": "0",
+  "power": "AC",
+  "python": "3.14.8",
+  "ollama_version": "0.40.1",
+  "memory_free_pct": 52,
+  "swap_used_mb": 8933.69,
+  "installed_models": [
+   {
+    "name": "gemma4:26b-mlx",
+    "size_gb": 18.3,
+    "digest": "f0fc7e0ae494",
+    "family": "",
+    "parameter_size": "",
+    "quantization_level": "nvfp4"
+   }
+  ],
+  "other_models_installed": 4
+ },
+ "kind": "throughput",
+ "model": "gemma4:26b-mlx",
+ "num_ctx": 8192,
+ "runs": [
+  {
+   "cold": true,
+   "error": "",
+   "load_s": 5.44,
+   "ttft_s": 6.78,
+   "prompt_tokens": 1052,
+   "prompt_tok_s": 810.8,
+   "decode_tokens": 209,
+   "decode_tok_s": 60.9,
+   "wall_s": 10.18
+  },
+  {
+   "cold": false,
+   "error": "",
+   "load_s": 0.01,
+   "ttft_s": 1.29,
+   "prompt_tokens": 1052,
+   "prompt_tok_s": 848.0,
+   "decode_tokens": 177,
+   "decode_tok_s": 60.5,
+   "wall_s": 4.18
+  },
+  {
+   "cold": false,
+   "error": "",
+   "load_s": 0.01,
+   "ttft_s": 1.25,
+   "prompt_tokens": 1052,
+   "prompt_tok_s": 876.0,
+   "decode_tokens": 181,
+   "decode_tok_s": 59.2,
+   "wall_s": 4.27
+  },
+  {
+   "cold": false,
+   "error": "",
+   "load_s": 0.01,
+   "ttft_s": 1.26,
+   "prompt_tokens": 1052,
+   "prompt_tok_s": 865.7,
+   "decode_tokens": 221,
+   "decode_tok_s": 59.3,
+   "wall_s": 4.95
+  },
+  {
+   "cold": false,
+   "error": "",
+   "load_s": 0.01,
+   "ttft_s": 1.24,
+   "prompt_tokens": 1052,
+   "prompt_tok_s": 879.8,
+   "decode_tokens": 206,
+   "decode_tok_s": 59.5,
+   "wall_s": 4.67
+  },
+  {
+   "cold": false,
+   "error": "",
+   "load_s": 0.01,
+   "ttft_s": 1.25,
+   "prompt_tokens": 1052,
+   "prompt_tok_s": 876.3,
+   "decode_tokens": 203,
+   "decode_tok_s": 60.6,
+   "wall_s": 4.56
+  }
+ ],
+ "warm_summary": {
+  "ttft_s": {
+   "n": 5,
+   "median": 1.25,
+   "min": 1.24,
+   "max": 1.29
+  },
+  "prompt_tok_s": {
+   "n": 5,
+   "median": 876.0,
+   "min": 848.0,
+   "max": 879.8
+  },
+  "decode_tok_s": {
+   "n": 5,
+   "median": 59.5,
+   "min": 59.2,
+   "max": 60.6
+  },
+  "wall_s": {
+   "n": 5,
+   "median": 4.56,
+   "min": 4.18,
+   "max": 4.95
+  }
+ },
+ "decode_spread_pct": 2.3529411764705856
+}

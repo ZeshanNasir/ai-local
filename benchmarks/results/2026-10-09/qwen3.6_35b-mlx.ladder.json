@@ -1,0 +1,82 @@
+{
+ "recorded_at": "2026-10-09T13:25:52Z",
+ "environment": {
+  "macos": "27.0.1",
+  "hardware_model": "Mac16,7",
+  "chip": "Apple M4 Pro",
+  "memory_gib": 48,
+  "gpu_wired_limit_mb": "0",
+  "power": "AC",
+  "python": "3.14.8",
+  "ollama_version": "0.40.1",
+  "memory_free_pct": 32,
+  "swap_used_mb": 9550.19,
+  "installed_models": [
+   {
+    "name": "qwen3.6:35b-mlx",
+    "size_gb": 23.6,
+    "digest": "e92a3e94bbca",
+    "family": "",
+    "parameter_size": "",
+    "quantization_level": "nvfp4"
+   }
+  ],
+  "other_models_installed": 4
+ },
+ "kind": "ladder",
+ "model": "qwen3.6:35b-mlx",
+ "steps": [
+  {
+   "target_tokens": 8192,
+   "num_ctx": 10035,
+   "prompt_tokens": 8289,
+   "error": "",
+   "size_ok": true,
+   "recalled_fact": true,
+   "prompt_tok_s": 854.4,
+   "decode_tok_s": 63.1,
+   "ttft_s": 9.8,
+   "wall_s": 10.3,
+   "server_reported_gb": 24.2,
+   "min_free_pct": 32,
+   "max_swap_mb": 7835.81,
+   "swap_growth_mb": 0.0,
+   "samples": 4
+  },
+  {
+   "target_tokens": 32768,
+   "num_ctx": 37068,
+   "prompt_tokens": 33576,
+   "error": "",
+   "size_ok": true,
+   "recalled_fact": true,
+   "prompt_tok_s": 640.2,
+   "decode_tok_s": 48.2,
+   "ttft_s": 52.6,
+   "wall_s": 53.3,
+   "server_reported_gb": 25.5,
+   "min_free_pct": 26,
+   "max_swap_mb": 7827.81,
+   "swap_growth_mb": 0.0,
+   "samples": 18
+  },
+  {
+   "target_tokens": 65536,
+   "num_ctx": 73113,
+   "prompt_tokens": 67901,
+   "error": "",
+   "size_ok": true,
+   "recalled_fact": true,
+   "prompt_tok_s": 454.7,
+   "decode_tok_s": 36.9,
+   "ttft_s": 149.5,
+   "wall_s": 150.5,
+   "server_reported_gb": 27.8,
+   "min_free_pct": 13,
+   "max_swap_mb": 9638.25,
+   "swap_growth_mb": 1834.4399999999996,
+   "samples": 50,
+   "stopped_here": true
+  }
+ ]
+}

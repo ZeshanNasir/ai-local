@@ -1,0 +1,105 @@
+[
+ {
+  "id": "q-retention",
+  "question": "How many days are nightly backups kept?",
+  "expect": {
+   "status": "answered",
+   "sources": [
+    "backup-retention"
+   ],
+   "contains": "14"
+  },
+  "topic": [
+   "backup-retention"
+  ]
+ },
+ {
+  "id": "q-retention-2",
+  "question": "How long before an old nightly backup is deleted?",
+  "expect": {
+   "status": "answered",
+   "sources": [
+    "backup-retention"
+   ],
+   "contains": "14"
+  },
+  "topic": [
+   "backup-retention"
+  ]
+ },
+ {
+  "id": "q-deploy",
+  "question": "When can we deploy to production?",
+  "expect": {
+   "status": "answered",
+   "sources": [
+    "deploy-window"
+   ],
+   "contains": "tuesday"
+  },
+  "topic": [
+   "deploy-window"
+  ]
+ },
+ {
+  "id": "q-rotation",
+  "question": "How often are service API keys rotated?",
+  "expect": {
+   "status": "answered",
+   "sources": [
+    "rotate-keys-v2"
+   ],
+   "contains": "30"
+  },
+  "topic": [
+   "rotate-keys-v1",
+   "rotate-keys-v2"
+  ]
+ },
+ {
+  "id": "q-rotation-2",
+  "question": "Do I need to raise a ticket to rotate a service key?",
+  "expect": {
+   "status": "answered",
+   "sources": [
+    "rotate-keys-v2"
+   ],
+   "contains": "no"
+  },
+  "topic": [
+   "rotate-keys-v1",
+   "rotate-keys-v2"
+  ]
+ },
+ {
+  "id": "q-mtu",
+  "question": "What MTU should the branch router tunnel use?",
+  "expect": {
+   "status": "conflict",
+   "sources": [
+    "vpn-guide-a",
+    "vpn-guide-b"
+   ]
+  },
+  "topic": [
+   "vpn-guide-a",
+   "vpn-guide-b"
+  ]
+ },
+ {
+  "id": "q-oncall",
+  "question": "What is the on-call phone number?",
+  "expect": {
+   "status": "insufficient"
+  },
+  "topic": []
+ },
+ {
+  "id": "q-staging",
+  "question": "What is the hostname of the staging database?",
+  "expect": {
+   "status": "insufficient"
+  },
+  "topic": []
+ }
+]

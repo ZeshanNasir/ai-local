@@ -1,0 +1,119 @@
+{
+ "recorded_at": "2026-10-09T14:27:40Z",
+ "environment": {
+  "macos": "27.0.1",
+  "hardware_model": "Mac16,7",
+  "chip": "Apple M4 Pro",
+  "memory_gib": 48,
+  "gpu_wired_limit_mb": "0",
+  "power": "AC",
+  "python": "3.14.8",
+  "ollama_version": "0.40.1",
+  "memory_free_pct": 49,
+  "swap_used_mb": 8470.25,
+  "installed_models": [
+   {
+    "name": "gemma4:26b-mlx",
+    "size_gb": 18.3,
+    "digest": "f0fc7e0ae494",
+    "family": "",
+    "parameter_size": "",
+    "quantization_level": "nvfp4"
+   }
+  ],
+  "other_models_installed": 4
+ },
+ "kind": "agent",
+ "model": "gemma4:26b-mlx",
+ "harness": "opencode",
+ "summary": "3/3 fixed without editing tests",
+ "runs": [
+  {
+   "final_text": "OK",
+   "model": "gemma4:26b-mlx",
+   "harness": "opencode",
+   "tests_pass_after": true,
+   "files_changed": [
+    "calc/pricing.py"
+   ],
+   "edited_tests": false,
+   "wall_s": 92.7,
+   "error": "",
+   "event_count": 24,
+   "event_types": {
+    "step_start": 8,
+    "tool_use": 7,
+    "step_finish": 8,
+    "text": 1
+   },
+   "tool_events": 7,
+   "network_endpoint_classes_seen": {
+    "ollama": {
+     "loopback": 6
+    },
+    "opencode": {
+     "loopback": 2,
+     "other": 3
+    }
+   }
+  },
+  {
+   "final_text": "The bug was fixed by adding a check for the `percent` range and correcting the rounding logic to ensure halves round up.\n\n```python\ndef apply_discount(price_cents: int, percent: int) -> int:\n    \"\"\"Return the price after a percentage discount, rounded to the nearest cent (halves round up).\n\n    percent must be between 0 and 100 inclusive; anything else raises ValueError.\n    \"\"\"\n    if not 0 <= pe",
+   "model": "gemma4:26b-mlx",
+   "harness": "opencode",
+   "tests_pass_after": true,
+   "files_changed": [
+    "calc/pricing.py"
+   ],
+   "edited_tests": false,
+   "wall_s": 100.0,
+   "error": "",
+   "event_count": 30,
+   "event_types": {
+    "step_start": 10,
+    "tool_use": 9,
+    "step_finish": 10,
+    "text": 1
+   },
+   "tool_events": 9,
+   "network_endpoint_classes_seen": {
+    "ollama": {
+     "loopback": 6
+    },
+    "opencode": {
+     "loopback": 2,
+     "other": 3
+    }
+   }
+  },
+  {
+   "final_text": "OK",
+   "model": "gemma4:26b-mlx",
+   "harness": "opencode",
+   "tests_pass_after": true,
+   "files_changed": [
+    "calc/pricing.py"
+   ],
+   "edited_tests": false,
+   "wall_s": 92.5,
+   "error": "",
+   "event_count": 21,
+   "event_types": {
+    "step_start": 7,
+    "tool_use": 6,
+    "step_finish": 7,
+    "text": 1
+   },
+   "tool_events": 6,
+   "network_endpoint_classes_seen": {
+    "ollama": {
+     "loopback": 6
+    },
+    "opencode": {
+     "loopback": 2,
+     "other": 3
+    }
+   }
+  }
+ ]
+}

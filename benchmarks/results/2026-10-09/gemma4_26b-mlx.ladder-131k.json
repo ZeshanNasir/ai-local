@@ -1,0 +1,48 @@
+{
+ "recorded_at": "2026-10-09T13:51:07Z",
+ "environment": {
+  "macos": "27.0.1",
+  "hardware_model": "Mac16,7",
+  "chip": "Apple M4 Pro",
+  "memory_gib": 48,
+  "gpu_wired_limit_mb": "0",
+  "power": "AC",
+  "python": "3.14.8",
+  "ollama_version": "0.40.1",
+  "memory_free_pct": 38,
+  "swap_used_mb": 9797.75,
+  "installed_models": [
+   {
+    "name": "gemma4:26b-mlx",
+    "size_gb": 18.3,
+    "digest": "f0fc7e0ae494",
+    "family": "",
+    "parameter_size": "",
+    "quantization_level": "nvfp4"
+   }
+  ],
+  "other_models_installed": 4
+ },
+ "kind": "ladder",
+ "model": "gemma4:26b-mlx",
+ "steps": [
+  {
+   "target_tokens": 131072,
+   "num_ctx": 145203,
+   "prompt_tokens": 136108,
+   "error": "",
+   "size_ok": true,
+   "recalled_fact": true,
+   "prompt_tok_s": 351.1,
+   "decode_tok_s": 18.7,
+   "ttft_s": 387.9,
+   "wall_s": 389.6,
+   "server_reported_gb": 25.3,
+   "min_free_pct": 13,
+   "max_swap_mb": 9869.75,
+   "swap_growth_mb": 1804.25,
+   "samples": 129,
+   "stopped_here": true
+  }
+ ]
+}

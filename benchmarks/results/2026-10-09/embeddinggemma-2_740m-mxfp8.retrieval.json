@@ -1,0 +1,47 @@
+{
+ "recorded_at": "2026-10-09T13:58:06Z",
+ "environment": {
+  "macos": "27.0.1",
+  "hardware_model": "Mac16,7",
+  "chip": "Apple M4 Pro",
+  "memory_gib": 48,
+  "gpu_wired_limit_mb": "0",
+  "power": "AC",
+  "python": "3.14.8",
+  "ollama_version": "0.40.1",
+  "memory_free_pct": 86,
+  "swap_used_mb": 8661.69,
+  "installed_models": [
+   {
+    "name": "embeddinggemma-2:740m-mxfp8",
+    "size_gb": 1.4,
+    "digest": "a4efd357164f",
+    "family": "",
+    "parameter_size": "",
+    "quantization_level": "mxfp8"
+   }
+  ],
+  "other_models_installed": 4
+ },
+ "kind": "retrieval",
+ "model": "embeddinggemma-2:740m-mxfp8",
+ "dimensions": 768,
+ "documents": 6,
+ "queries": 8,
+ "embedding": {
+  "queries": 6,
+  "recall_at_1": 1.0,
+  "mrr": 1.0
+ },
+ "bm25_baseline": {
+  "queries": 6,
+  "recall_at_1": 1.0,
+  "mrr": 1.0
+ },
+ "latency_s": {
+  "documents_batch": 1.52,
+  "queries_batch": 0.07,
+  "total": 1.6
+ },
+ "server_reported_gb": 1.33
+}
