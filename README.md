@@ -1,12 +1,8 @@
 # ai-local
 
-How much real engineering work can a developer Mac do with a local model, and at what cost in speed and memory?
+**Measures how fast, how accurately and at what memory cost local models handle everyday engineering tasks on an Apple Silicon Mac.**
 
-`ai-local` answers that with measurements, not impressions. It runs open-weight models through [Ollama](https://ollama.com) on Apple Silicon, times them, scores them on small synthetic engineering tasks, and saves every result with the conditions it was measured under. It is not a model leaderboard, and it does not claim local models replace hosted ones.
-
-## First run
-
-Requirements: a Mac with Apple Silicon, Python 3.10 or newer (included with the Xcode Command Line Tools), and [Ollama](https://ollama.com/download) installed and running. Nothing else to install.
+Before routing work to a local model, you need numbers from your own machine: tokens per second, time to first token, how large a prompt fits before the system starts swapping, and whether answers to log, document and code tasks are actually correct. `ai-local` measures those with Ollama and small synthetic tasks, and records every result with the conditions it was measured under. It is not a leaderboard, and it does not claim local models replace hosted ones.
 
 ```sh
 git clone https://github.com/ZeshanNasir/ai-local.git
@@ -14,22 +10,24 @@ cd ai-local
 ./lab
 ```
 
-`./lab` then:
+**Requirements:** Apple Silicon Mac, Python 3.10+ (part of the Xcode Command Line Tools), [Ollama](https://ollama.com/download) installed and running. No other dependencies.
 
-1. Checks the machine, Python and Ollama, and explains what is missing with a link to the official installer. It installs nothing.
-2. Refuses to run if `OLLAMA_HOST` points anywhere other than this machine.
-3. Lists the models that have published measurements and marks which are installed.
-4. If the chosen model is missing, shows its size and asks before running `ollama pull`. Nothing is downloaded without a yes.
-5. Runs a short benchmark: three warm throughput runs and the 15 synthetic tasks once. About a minute on the baseline machine once the model is loaded. The memory-stressing context ladder is not part of it.
-6. Saves `report.md` and the raw JSON to `results/<timestamp>/`, with chip, memory, macOS, Ollama version and power source recorded.
+**Consent before downloads:** `./lab` lists only models with published measurements. If the one you pick is missing, it shows the download size and runs `ollama pull` only after you answer yes.
 
-`./lab --model gemma4:26b-mlx` skips the menu. The full CLI remains available: `python3 -m labbench --help`.
+## What `./lab` does
+
+1. Checks the Mac, Python and Ollama; explains anything missing with a link to the official installer. Installs nothing.
+2. Stops if `OLLAMA_HOST` points at another machine. Requests go only to Ollama on this Mac.
+3. Runs a short benchmark: 3 warm throughput runs and 15 synthetic tasks once. About a minute on the baseline machine once the model is loaded. The memory-stressing context ladder is not included.
+4. Saves `report.md` and raw JSON to `results/<timestamp>/`, with chip, memory, macOS, Ollama version and power source.
+
+`./lab --model gemma4:26b-mlx` skips the menu. Every measurement is also available directly: `python3 -m labbench --help`.
 
 ## Measured environment
 
 All published results come from one machine: Apple M4 Pro, 48 GB unified memory, macOS 27.0.1, on AC power, Ollama 0.40.1 with flash attention and an 8-bit KV cache. Other chips and memory sizes have not been measured. `./lab` runs on them, says so, and the numbers it produces are your own first measurement, not a validated result.
 
-## Selected findings (2026-10-09)
+## Results (2026-10-09)
 
 | Model | Decode tok/s | Prompt tok/s | Logs | Documents | Code fix, one shot | Largest completed context |
 | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -39,10 +37,12 @@ All published results come from one machine: Apple M4 Pro, 48 GB unified memory,
 
 Throughput is the median of 5 warm runs (about 1,000-token prompt, 256-token cap, thinking off). Tasks ran 3 times each at temperature 0. The context column is the largest prompt recalled correctly before free memory fell to 13 to 15%, where the ladder stops.
 
-- Decode speed differs by more than 2x between models of similar size.
-- Long prompts hurt latency before memory: 2 to 12 minutes to the first token at about 67,000 tokens.
-- One-shot and agent-loop results differ: `gemma4:26b-mlx` failed the code fix in one shot, but fixed it in each of three experimental agent sessions that could run the tests.
-- The log and document tasks are too easy to separate the models. They show the method works, not which model is better at real work.
+What the numbers show:
+
+- **Model design matters more than size.** Decode speed differs by more than 2x between models of similar parameter count, and `qwen3.8:27b-mlx` reads prompts about 7x slower than the other two.
+- **Long prompts cost time before memory.** At about 67,000 tokens, the first token took 2 to 12 minutes. At that size, two of the three models had already pushed free memory down to 13 to 15% and into swap.
+- **Test feedback changes the outcome.** `gemma4:26b-mlx` failed the code fix in all three one-shot attempts but fixed it in each of three experimental agent sessions that could run the tests.
+- **The easy tasks do not rank models.** Every model passed all document cases. These tasks show the method works, not which model is better at real work.
 
 Full tables, including cold load, spread and every ladder step: `python3 -m labbench report benchmarks/results/2026-10-09`. Raw files: [`benchmarks/results/2026-10-09`](benchmarks/results/2026-10-09/).
 
