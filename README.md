@@ -21,6 +21,17 @@ gemma4:26b-mlx  60 tok/s         14/15  fast, missed code fix
 
 That is a real run on an M4 Pro. To skip the picker: `./lab gemma4:26b-mlx`.
 
+## Daily Engineering Workflow
+
+Launch supported models directly in standard coding agents via Ollama's native integrations:
+
+```sh
+ollama launch opencode --model gemma4:26b-mlx
+ollama launch claude --model gemma4:26b-mlx
+```
+
+Zero proxy configuration, custom wrappers, or background daemons required.
+
 ## What it supports
 
 Ollama with MLX-format models on Apple Silicon, and nothing else. `./lab` accepts only these three, which are tags labelled MLX in the official Ollama library: [`qwen3.6:35b-mlx`](https://ollama.com/library/qwen3.6/tags), [`gemma4:26b-mlx`](https://ollama.com/library/gemma4/tags) and [`qwen3.8:27b-mlx`](https://ollama.com/library/qwen3.8/tags). Each needs a recent Ollama: `ollama show MODEL` prints the minimum version.
