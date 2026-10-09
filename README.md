@@ -57,6 +57,16 @@ Measured on one M4 Pro with 48 GB, on one day. Check a model on your own work be
 Read [AGENTS.md](AGENTS.md) first: the mission, the boundaries and a map of the repository.
 Read [EXECUTIVE_BRIEF.md](EXECUTIVE_BRIEF.md) for the hardware procurement baseline and financial payback model.
 
-`python3 -m unittest discover -s tests` needs no model and no network.
+## Licensing and commercial use
+
+The `ai-local` benchmark harness is released under the [MIT license](LICENSE).
+
+All supported fleet models carry permissive open-source licenses granting unrestricted commercial and organizational use with zero royalties:
+* **Ollama Runtime**: MIT License
+* **Qwen Models** (`qwen3.6:35b`, `qwen3.8:27b`): Apache License 2.0 (Alibaba Cloud)
+* **Gemma Models** (`gemma4:26b`, `embeddinggemma-2:740m`): Apache License 2.0 (Google DeepMind)
+* **Clef Models** (`clef-flash:9b`): Apache License 2.0 (Cloudflare / Community)
+
+None of these components use copyleft (GPL) terms or impose monthly active user (MAU) revenue thresholds. Internal organizational engineering use is fully permitted.
 
 MIT licence.
