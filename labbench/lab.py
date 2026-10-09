@@ -1,11 +1,12 @@
 """./lab: which local model should I use on this Mac?
 
-Tests the models already installed in Ollama for speed and accuracy, prints one table and saves it.
-Never installs or downloads anything, and never talks to a server other than this machine.
+Tests a model in Ollama for speed and tasks passed, prints one table and saves it.
+Downloads a model only after you type y, and never talks to a server other than this machine.
 """
 import json
 import platform
 import shutil
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -13,8 +14,8 @@ from pathlib import Path
 from . import bench, env, ollama, workloads
 
 ROOT = Path(__file__).resolve().parent.parent
-FAST_TOK_S = 40
-SUGGESTED = "gemma4:26b-mlx"  # about 18 GB; measured in RESULTS.md
+FAST_TOK_S = 40  # a local rule of thumb, not a standard
+MEASURED = ("qwen3.6:35b-mlx", "gemma4:26b-mlx", "qwen3.8:27b-mlx")  # the models in RESULTS.md
 
 
 def preflight():
@@ -34,6 +35,26 @@ def preflight():
 
 def chat_models(installed):
     return [m["name"] for m in installed if "embed" not in m["name"].lower() and "embed" not in (m.get("family") or "").lower()]
+
+
+def pull(model, ask=input):
+    """Download one model only after an explicit y. Anything else, including no terminal, declines."""
+    try:
+        answer = ask(f"{model} is not installed. Download it with `ollama pull {model}`? [y/N] ")
+    except EOFError:
+        return False
+    return answer.strip().lower() == "y" and subprocess.run(["ollama", "pull", model]).returncode == 0
+
+
+def choose(installed, ask=input):
+    """List the measured models and return the one picked, or None."""
+    for i, name in enumerate(MEASURED, 1):
+        print(f"  {i}. {name:<18} {'installed' if name in installed else 'not installed'}")
+    try:
+        pick = ask("Pick 1-3 (Enter to quit): ").strip()
+    except EOFError:
+        return None
+    return MEASURED[int(pick) - 1] if pick in ("1", "2", "3") else None
 
 
 def test(model):
@@ -57,7 +78,7 @@ def verdict(r):
 
 
 def table(results):
-    rows = [("Model", "Speed", "Accuracy", "Verdict")] + [
+    rows = [("Model", "Speed", "Tasks passed", "Verdict")] + [
         (r["model"], f"{r['decode_tok_s'] or 0:.0f} tok/s", f"{r['passed']}/{r['total']}", verdict(r)) for r in results]
     width = [max(len(row[i]) for row in rows) for i in range(3)]
     return "\n".join(f"{a:<{width[0]}}  {b:>{width[1]}}  {c:>{width[2]}}  {d}" for a, b, c, d in rows)
@@ -66,7 +87,7 @@ def table(results):
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if argv[:1] in (["-h"], ["--help"]):
-        print("usage: ./lab [MODEL ...]\n\nTests installed Ollama models (or only the named ones) for speed and accuracy.")
+        print("usage: ./lab [MODEL ...]\n\nPick a measured model (or name models) and test it for speed and tasks passed.")
         return 0
     problem = preflight()
     if problem:
@@ -74,12 +95,13 @@ def main(argv=None):
         return 1
     snap = env.snapshot()
     installed = chat_models(snap["installed_models"])
-    models = argv or installed
-    missing = [m for m in models if m not in installed]
-    if not models or missing:
-        print(f"{'Not installed: ' + ', '.join(missing) if missing else 'No models installed.'}\n"
-              f"Install one yourself, then run ./lab again, for example:\n  ollama pull {SUGGESTED}   # about 18 GB", file=sys.stderr)
-        return 1
+    models = argv or [choose(installed)]
+    if models == [None]:
+        return 0
+    for m in models:
+        if m not in installed and not (m in MEASURED and pull(m)):
+            print(f"Not installed: {m}", file=sys.stderr)
+            return 1
 
     machine = f"{snap['chip']}, {snap['memory_gib']} GB, macOS {snap['macos']}, Ollama {snap['ollama_version']}"
     print(machine)

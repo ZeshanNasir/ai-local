@@ -1,4 +1,5 @@
 import json
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -103,14 +104,60 @@ class Lab(unittest.TestCase):
         self.assertEqual(lab.verdict(good), "fast, all tasks passed")
         self.assertEqual(lab.verdict(slow), "slow, missed 1 log task, code fix")
         self.assertIn("68 tok/s", lab.table([good, slow]))
+        self.assertIn("Tasks passed", lab.table([good]))
 
-    def test_nothing_is_downloaded_when_a_model_is_missing(self):
-        snap = {"chip": "Apple M4 Pro", "memory_gib": 48, "macos": "27", "ollama_version": "x", "installed_models": []}
-        with mock.patch.object(lab, "preflight", return_value=None), mock.patch.object(lab.env, "snapshot", return_value=snap), \
-             mock.patch.object(lab, "test") as run, mock.patch("sys.stderr"):
-            self.assertEqual(lab.main(["gemma4:26b-mlx"]), 1)
-            self.assertEqual(lab.main([]), 1)
-        run.assert_not_called()
+    def test_choose_returns_the_picked_model(self):
+        with mock.patch("builtins.print"):
+            self.assertEqual(lab.choose([], ask=lambda _: "2"), "gemma4:26b-mlx")
+            for answer in ("", "0", "4", "x"):
+                self.assertIsNone(lab.choose([], ask=lambda _, a=answer: a))
+            self.assertIsNone(lab.choose([], ask=mock.Mock(side_effect=EOFError)))
+
+    def test_download_needs_an_explicit_yes(self):
+        with mock.patch.object(lab.subprocess, "run") as run:
+            for answer in ("", "n", "yes please", " "):
+                self.assertFalse(lab.pull("m:1", ask=lambda _, a=answer: a))
+            self.assertFalse(lab.pull("m:1", ask=mock.Mock(side_effect=EOFError)))
+            run.assert_not_called()
+            run.return_value.returncode = 0
+            self.assertTrue(lab.pull("m:1", ask=lambda _: " Y "))
+            run.assert_called_once_with(["ollama", "pull", "m:1"])
+            run.return_value.returncode = 1
+            self.assertFalse(lab.pull("m:1", ask=lambda _: "y"))
+
+    def _run_main(self, argv, installed, pick=None, pulled=False):
+        """Run lab.main with every outside effect mocked. Returns (exit code, calls in order, results dir exists)."""
+        calls = mock.Mock()
+        calls.pull.return_value = pulled
+        calls.test.return_value = {"model": "m", "decode_tok_s": 60, "passed": 15, "total": 15, "missed": []}
+        snap = {"chip": "c", "memory_gib": 1, "macos": "27", "ollama_version": "x", "installed_models": [{"name": n} for n in installed]}
+        with tempfile.TemporaryDirectory() as root, mock.patch.object(lab, "ROOT", Path(root)), \
+             mock.patch.object(lab, "preflight", return_value=None), mock.patch.object(lab.env, "snapshot", return_value=snap), \
+             mock.patch.object(lab, "choose", return_value=pick), mock.patch.object(lab, "pull", calls.pull), \
+             mock.patch.object(lab, "test", calls.test), mock.patch("sys.stderr"), mock.patch("builtins.print"):
+            code = lab.main(argv)
+            return code, [c[0] for c in calls.mock_calls], (Path(root) / "results").exists()
+
+    def test_approved_download_runs_the_benchmark_only_after_the_pull_succeeds(self):
+        code, calls, saved = self._run_main([], installed=[], pick="gemma4:26b-mlx", pulled=True)
+        self.assertEqual((code, calls, saved), (0, ["pull", "test"], True))
+
+    def test_declined_or_failed_download_runs_nothing_and_saves_nothing(self):
+        code, calls, saved = self._run_main([], installed=[], pick="gemma4:26b-mlx", pulled=False)  # pull() is False for no, EOF and a failed pull
+        self.assertEqual((code, calls, saved), (1, ["pull"], False))
+
+    def test_named_missing_model_uses_the_same_consent_rule(self):
+        self.assertEqual(self._run_main(["gemma4:26b-mlx"], installed=[], pulled=True)[1], ["pull", "test"])
+        self.assertEqual(self._run_main(["gemma4:26b-mlx"], installed=[], pulled=False)[1], ["pull"])
+
+    def test_model_outside_the_measured_list_is_never_pulled(self):
+        self.assertEqual(self._run_main(["other:1"], installed=[], pulled=True), (1, [], False))
+
+    def test_quitting_the_picker_runs_nothing_and_saves_nothing(self):
+        self.assertEqual(self._run_main([], installed=[], pick=None), (0, [], False))
+
+    def test_installed_model_is_tested_without_a_download(self):
+        self.assertEqual(self._run_main([], installed=["gemma4:26b-mlx"], pick="gemma4:26b-mlx"), (0, ["test"], True))
 
 
 if __name__ == "__main__":
